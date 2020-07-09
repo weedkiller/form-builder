@@ -110,7 +110,7 @@ namespace form_builder_tests.UnitTests.Helpers
         public void GetEmailToAddresses_ShouldReturnListOfToEmailAddress()
         {
             // Act
-            var result = _actionHelper.GetEmailToAddresses(_formSchema.FormActions.FirstOrDefault(), _mappingEntity.FormAnswers);
+            var result = _actionHelper.InsertFormAnswersIntoProperty(_formSchema.FormActions.FirstOrDefault(), _mappingEntity.FormAnswers);
 
             // Assert
             Assert.Equal("testResponse.email@test.com,email.test@test.com,", result);

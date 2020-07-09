@@ -45,8 +45,11 @@ using form_builder.Factories.Transform.Lookups;
 using form_builder.Factories.Transform.ReusableElements;
 using form_builder.Helpers.ActionsHelpers;
 using form_builder.Providers.EmailProvider;
+using form_builder.Providers.SmsProvider;
 using form_builder.Services.ActionService;
 using form_builder.Services.RetrieveExternalDataService;
+using Notify.Client;
+using Notify.Interfaces;
 using Serilog;
 
 namespace form_builder.Extensions
@@ -102,6 +105,13 @@ namespace form_builder.Extensions
             var credentials = new BasicAWSCredentials(accessKey, secretKey);
             services.AddTransient<IAmazonSimpleEmailService>(_ =>
                 new AmazonSimpleEmailServiceClient(credentials, RegionEndpoint.EUWest1));
+
+            return services;
+        }
+
+        public static IServiceCollection AddNotifySmsConfiguration(this IServiceCollection services, string apiKey)
+        {
+            services.AddTransient<INotificationClient>(_ => new NotificationClient(apiKey));
 
             return services;
         }
@@ -170,6 +180,14 @@ namespace form_builder.Extensions
         public static IServiceCollection ConfigureEmailProviders(this IServiceCollection services)
         {
             services.AddSingleton<IEmailProvider, AwsSesProvider>();
+            return services;
+        }
+
+        public static IServiceCollection ConfigureNotifySmsProvider(this IServiceCollection services, string apiKey)
+        {
+
+            services.AddSingleton<ISmsProvider, SmsProvider>();
+
             return services;
         }
 
@@ -250,6 +268,7 @@ namespace form_builder.Extensions
             services.Configure<DistributedCacheExpirationConfiguration>(configuration.GetSection("DistrbutedCacheExpiration"));
             services.Configure<DistrbutedCacheConfiguration>(cacheOptions => cacheOptions.UseDistrbutedCache = configuration.GetValue<bool>("UseDistrbutedCache"));
             services.Configure<AwsSesKeysConfiguration>(configuration.GetSection("Ses"));
+            services.Configure<NotifySmsConfiguration>(configuration.GetSection("SmsTemplateConfiguration"));
 
             return services;
         }

@@ -7,8 +7,8 @@ using form_builder.Helpers.ActionsHelpers;
 using form_builder.Helpers.Session;
 using form_builder.Models;
 using form_builder.Providers.EmailProvider;
+using form_builder.Providers.SmsProvider;
 using form_builder.Providers.StorageProvider;
-using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
 
 namespace form_builder.Services.ActionService
@@ -24,13 +24,15 @@ namespace form_builder.Services.ActionService
         private readonly IDistributedCacheWrapper _distributedCache;
         private readonly IEmailProvider _emailProvider;
         private readonly IActionHelper _actionHelper;
+        private readonly ISmsProvider _smsProvider;
 
-        public ActionService(ISessionHelper sessionHelper, IDistributedCacheWrapper distributedCache, IEmailProvider emailProvider, IActionHelper actionHelper)
+        public ActionService(ISessionHelper sessionHelper, IDistributedCacheWrapper distributedCache, IEmailProvider emailProvider, IActionHelper actionHelper, ISmsProvider smsProvider)
         {
             _sessionHelper = sessionHelper;
             _distributedCache = distributedCache;
             _emailProvider = emailProvider;
             _actionHelper = actionHelper;
+            _smsProvider = smsProvider;
         }
         public async Task Process(FormSchema baseForm)
         {
@@ -54,13 +56,24 @@ namespace form_builder.Services.ActionService
                                 action.Properties.Subject,
                                 action.Properties.Content,
                                 action.Properties.From,
-                                _actionHelper.GetEmailToAddresses(action, formAnswers));
+                                _actionHelper.InsertFormAnswersIntoProperty(action, formAnswers));
 
                             await _emailProvider.SendAwsSesEmail(message);
                             break;
 
                         case EFormActionType.BackOfficeEmail:
                             SendUserEmail(action, formAnswers);
+                            break;
+
+                        case EFormActionType.UserSms:
+                            var recipients = _actionHelper.InsertFormAnswersIntoProperty(action, formAnswers).Split(",");
+                            var content = _actionHelper.InsertFormAnswersIntoContent(action, formAnswers);
+                            foreach (var recipient in recipients)
+                            {
+                                if (!string.IsNullOrEmpty(recipient))
+                                    _smsProvider.SendSms(recipient, content, action.Properties.Template);
+                            }
+                            
                             break;
 
                         default: break;
@@ -91,7 +104,7 @@ namespace form_builder.Services.ActionService
                 IsBodyHtml = true
             };
 
-            var toEmails = _actionHelper.GetEmailToAddresses(action, formAnswers).Split(",");
+            var toEmails = _actionHelper.InsertFormAnswersIntoProperty(action, formAnswers).Split(",");
 
             foreach (var email in toEmails)
             {

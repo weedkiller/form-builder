@@ -12,6 +12,7 @@ using form_builder.Models;
 using form_builder.Models.Elements;
 using form_builder.Models.Properties.ActionProperties;
 using form_builder.Providers.EmailProvider;
+using form_builder.Providers.SmsProvider;
 using form_builder.Providers.StorageProvider;
 using form_builder.Services.ActionService;
 using form_builder_tests.Builders;
@@ -29,6 +30,7 @@ namespace form_builder_tests.UnitTests.Services
         private readonly Mock<IDistributedCacheWrapper> _mockDistributedCache = new Mock<IDistributedCacheWrapper>();
         private readonly Mock<IEmailProvider> _mockEmailProvider = new Mock<IEmailProvider>();
         private readonly Mock<IActionHelper> _mockActionHelper = new Mock<IActionHelper>();
+        private readonly Mock<ISmsProvider> _mockSmsProvide = new Mock<ISmsProvider>();
 
         private static readonly Element Element = new ElementBuilder()
             .WithType(EElementType.H2)
@@ -58,7 +60,8 @@ namespace form_builder_tests.UnitTests.Services
                 _mockSessionHelper.Object, 
                 _mockDistributedCache.Object, 
                 _mockEmailProvider.Object,
-                _mockActionHelper.Object);
+                _mockActionHelper.Object,
+                _mockSmsProvide.Object);
 
             _mockSessionHelper.Setup(_ => _.GetSessionGuid()).Returns("sessionGuid");
 
@@ -72,7 +75,7 @@ namespace form_builder_tests.UnitTests.Services
         public async Task Process_ShouldCall_SessionHelper()
         {
             // Arrange
-            _mockActionHelper.Setup(_ => _.GetEmailToAddresses(It.IsAny<FormAction>(), It.IsAny<FormAnswers>()))
+            _mockActionHelper.Setup(_ => _.InsertFormAnswersIntoProperty(It.IsAny<FormAction>(), It.IsAny<FormAnswers>()))
                 .Returns("test@testemail.com");
 
             _mockEmailProvider.Setup(_ => _.SendAwsSesEmail(It.IsAny<EmailMessage>())).ReturnsAsync(HttpStatusCode.OK);
@@ -112,7 +115,7 @@ namespace form_builder_tests.UnitTests.Services
             await _actionService.Process(FormSchema);
 
             // Assert
-            _mockActionHelper.Verify(_ => _.GetEmailToAddresses(It.IsAny<FormAction>(), It.IsAny<FormAnswers>()), Times.Once);
+            _mockActionHelper.Verify(_ => _.InsertFormAnswersIntoProperty(It.IsAny<FormAction>(), It.IsAny<FormAnswers>()), Times.Once);
         }
 
         [Fact]
@@ -155,7 +158,7 @@ namespace form_builder_tests.UnitTests.Services
             await _actionService.Process(formSchema);
 
             // Assert
-            _mockActionHelper.Verify(_ => _.GetEmailToAddresses(It.IsAny<FormAction>(), It.IsAny<FormAnswers>()), Times.Never);
+            _mockActionHelper.Verify(_ => _.InsertFormAnswersIntoProperty(It.IsAny<FormAction>(), It.IsAny<FormAnswers>()), Times.Never);
         }
 
         [Fact]

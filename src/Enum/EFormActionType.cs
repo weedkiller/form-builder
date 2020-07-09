@@ -4,6 +4,7 @@
     {
         Unknown,
         UserEmail,
-        BackOfficeEmail
+        BackOfficeEmail,
+        UserSms
     }
 }

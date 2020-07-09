@@ -9,7 +9,9 @@ namespace form_builder.Helpers.ActionsHelpers
     {
         ExternalDataEntity GenerateUrl(string baseUrl, FormAnswers formAnswers);
 
-        string GetEmailToAddresses(FormAction action, FormAnswers formAnswers);
+        string InsertFormAnswersIntoProperty(FormAction action, FormAnswers formAnswers);
+
+        string InsertFormAnswersIntoContent(FormAction action, FormAnswers formAnswers);
     }
 
     public class ActionHelper : IActionHelper
@@ -27,19 +29,28 @@ namespace form_builder.Helpers.ActionsHelpers
             };
         }
 
-        public string GetEmailToAddresses(FormAction action, FormAnswers formAnswers)
+        public string InsertFormAnswersIntoProperty(FormAction action, FormAnswers formAnswers)
         {
             var matches = _tagRegex.Matches(action.Properties.To).ToList();
 
-            var emailList = matches
+            var questionIdList = matches
                 .Select(match => RecursiveGetAnswerValue(match.Value, formAnswers.Pages
                     .SelectMany(_ => _.Answers)
                     .FirstOrDefault(_ => _.QuestionId.Equals(match.Value))))
                 .ToList();
 
-            emailList.AddRange(action.Properties.To.Split(",").Where(_ => !_tagRegex.IsMatch(_)));
+            questionIdList.AddRange(action.Properties.To.Split(",").Where(_ => !_tagRegex.IsMatch(_)));
 
-            return emailList.Aggregate("", (current, email) => current + email + ",");
+            return questionIdList.Aggregate("", (questionId, answer) => questionId + answer + ",");
+        }
+
+        public string InsertFormAnswersIntoContent(FormAction action, FormAnswers formAnswers)
+        {
+            var matches = _tagRegex.Matches(action.Properties.Content).ToList();
+
+            var content = matches.Aggregate(action.Properties.Content, (current, match) => Replace(match, current, formAnswers));
+
+            return content;
         }
 
         private string Replace(Match match, string current, FormAnswers formAnswers)
