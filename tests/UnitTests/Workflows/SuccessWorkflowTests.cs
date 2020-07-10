@@ -54,7 +54,7 @@ namespace form_builder_tests.UnitTests.Workflows
         public async Task Process_ShouldCallSchemaFactory()
         {
             // Act
-            await _workflow.Process("form");
+            await _workflow.Process("form", "123");
 
             // Assert
             _mockSchemaFactory.Verify(_ => _.Build("form"), Times.Once);
@@ -64,10 +64,10 @@ namespace form_builder_tests.UnitTests.Workflows
         public async Task Process_ShouldNotCallActionService()
         {
             // Act
-            await _workflow.Process("form");
+            await _workflow.Process("form", "123");
 
             // Assert
-            _mockActionService.Verify(_ => _.Process(It.IsAny<FormSchema>()), Times.Never);
+            _mockActionService.Verify(_ => _.Process(It.IsAny<FormSchema>(), It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
@@ -99,17 +99,17 @@ namespace form_builder_tests.UnitTests.Workflows
             _mockSchemaFactory.Setup(_ => _.Build(It.IsAny<string>())).ReturnsAsync(formSchema);
 
             // Act
-            await _workflow.Process("form");
+            await _workflow.Process("form", "123");
 
             // Assert
-            _mockActionService.Verify(_ => _.Process(It.IsAny<FormSchema>()), Times.Once);
+            _mockActionService.Verify(_ => _.Process(It.IsAny<FormSchema>(), It.IsAny<string>()), Times.Once);
         }
 
         [Fact]
         public async Task Process_ShouldCallPageService()
         {
             // Act
-            await _workflow.Process("form");
+            await _workflow.Process("form", "123");
 
             // Assert
             _mockPageService.Verify(_ => _.FinalisePageJourney("form", EBehaviourType.SubmitForm), Times.Once);

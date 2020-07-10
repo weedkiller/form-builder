@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using form_builder.Models;
 using form_builder.Services.RetrieveExternalDataService.Entities;
@@ -13,7 +14,7 @@ namespace form_builder.Helpers.ActionsHelpers
 
         string InsertFormAnswersIntoContent(FormAction action, FormAnswers formAnswers);
 
-        string InsertFormAnswersIntoParameters(FormAction action, FormAnswers formAnswers);
+        Dictionary<string, dynamic> InsertFormAnswersIntoParameters(FormAction action, FormAnswers formAnswers);
     }
 
     public class ActionHelper : IActionHelper
@@ -55,7 +56,7 @@ namespace form_builder.Helpers.ActionsHelpers
             return content;
         }
 
-        public string InsertFormAnswersIntoParameters(FormAction action, FormAnswers formAnswers)
+        public Dictionary<string, dynamic> InsertFormAnswersIntoParameters(FormAction action, FormAnswers formAnswers)
         {
             var matches = _tagRegex.Matches(action.Properties.Content).ToList();
 
@@ -65,9 +66,19 @@ namespace form_builder.Helpers.ActionsHelpers
                     .FirstOrDefault(_ => _.QuestionId.Equals(match.Value))))
                 .ToList();
 
-            questionIdList.AddRange(action.Properties.To.Split(",").Where(_ => !_tagRegex.IsMatch(_)));
+            questionIdList.AddRange(action.Properties.Content.Split(",").Where(_ => !_tagRegex.IsMatch(_)));
 
-            return questionIdList.Aggregate("", (questionId, answer) => questionId + answer + ",");
+            var personalisation = new Dictionary<string, dynamic>();
+
+            for (var i = 0; i < questionIdList.Count; i++)
+            {
+                personalisation.Add(matches[i].Value, questionIdList[i]);
+            }
+
+            //var personalisation = matches.Select((key, i) => new { key.Value, value = questionIdList[i] })
+            //    .ToDictionary(x => x.Value, x => (dynamic)x.value);
+
+            return personalisation;
         }
 
         private string Replace(Match match, string current, FormAnswers formAnswers)

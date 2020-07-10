@@ -11,7 +11,9 @@ namespace form_builder.Providers.SmsProvider
     {
         SmsNotificationResponse SendSms(string phoneNumber, string content, string template);
 
-        EmailNotificationResponse SendEmail(string toEmail, string[] content, string template);
+        EmailNotificationResponse SendEmail(string toEmail, string content, string template);
+
+        EmailNotificationResponse SendEmailWithTemplate(string toEmail, Dictionary<string, dynamic> personalisation, string template);
     }
 
     public class SmsProvider : ISmsProvider
@@ -41,23 +43,30 @@ namespace form_builder.Providers.SmsProvider
             return response;
         }
 
-        public EmailNotificationResponse SendEmail(string toEmail, string[] content, string template)
+        public EmailNotificationResponse SendEmail(string toEmail, string content, string template)
         {
             var personalisation = new Dictionary<string, dynamic>
             {
                 {
-                    "firstName", content[0]
-                },
-                {
-                    "caseRef", content[1]
+                    "content", content
                 }
             };
-
             var response = _notificationClient.SendEmail(
                 emailAddress: toEmail,
                 templateId: _configuration.Templates.FirstOrDefault(_ => _.Name.Equals(template)).Id,
                 personalisation: personalisation
                 );
+
+            return response;
+        }
+
+        public EmailNotificationResponse SendEmailWithTemplate(string toEmail, Dictionary<string, dynamic> personalisation, string template)
+        {
+            var response = _notificationClient.SendEmail(
+                emailAddress: toEmail,
+                templateId: _configuration.Templates.FirstOrDefault(_ => _.Name.Equals(template)).Id,
+                personalisation: personalisation
+            );
 
             return response;
         }

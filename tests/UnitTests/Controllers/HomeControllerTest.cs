@@ -46,7 +46,7 @@ namespace form_builder_tests.UnitTests.Controllers
                 _mockActionsWorkflow.Object,
                 _mockSucessWorkflow.Object) {TempData = tempData};
 
-            _mockSucessWorkflow.Setup(_ => _.Process(It.IsAny<string>())).ReturnsAsync(new SuccessPageEntity
+            _mockSucessWorkflow.Setup(_ => _.Process(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new SuccessPageEntity
             {
                 FormAnswers = new FormAnswers(),
                 FormName = "form",
@@ -583,7 +583,7 @@ namespace form_builder_tests.UnitTests.Controllers
             await _homeController.Success("form");
 
             // Assert
-            _mockSucessWorkflow.Verify(_ => _.Process("form"), Times.Once);
+            _mockSucessWorkflow.Verify(_ => _.Process("form", It.IsAny<string>()), Times.Once);
         }
 
         [Fact]

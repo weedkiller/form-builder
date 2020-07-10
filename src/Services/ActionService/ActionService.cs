@@ -59,11 +59,13 @@ namespace form_builder.Services.ActionService
                         }
                     }
                 });
+
                 foreach (var action in baseForm.FormActions)
                 {
                     switch (action.Type)
                     {
                         case EFormActionType.UserEmail:
+                            // Example for AWS SES
                             var awsEmailcontent = _actionHelper.InsertFormAnswersIntoContent(action, formAnswers);
                             var message = new EmailMessage(
                                 action.Properties.Subject,
@@ -75,17 +77,27 @@ namespace form_builder.Services.ActionService
                             break;
 
                         case EFormActionType.BackOfficeEmail:
+                            // Example for Notify Email passing in full template contents
+                            //var emailRecipients = _actionHelper.InsertFormAnswersIntoProperty(action, formAnswers).Split(",");
+                            //foreach (var recipient in emailRecipients)
+                            //{
+                            //    if (!string.IsNullOrEmpty(recipient))
+                            //        _smsProvider.SendEmail(recipient, action.Properties.Content, action.Properties.Template);
+                            //}
+
+                            // Example for Notify Email using template and passing a dictionary of values
                             var emailRecipients = _actionHelper.InsertFormAnswersIntoProperty(action, formAnswers).Split(",");
-                            var emailContent = _actionHelper.InsertFormAnswersIntoParameters(action, formAnswers).Split(",");
+                            var emailContent = _actionHelper.InsertFormAnswersIntoParameters(action, formAnswers);
                             foreach (var recipient in emailRecipients)
                             {
                                 if (!string.IsNullOrEmpty(recipient))
-                                    _smsProvider.SendEmail(recipient, emailContent, action.Properties.Template);
+                                    _smsProvider.SendEmailWithTemplate(recipient, emailContent, action.Properties.Template);
                             }
-                            //SendUserEmail(action, formAnswers);
+
                             break;
 
                         case EFormActionType.UserSms:
+                            // Example for Notify SMS
                             var recipients = _actionHelper.InsertFormAnswersIntoProperty(action, formAnswers).Split(",");
                             var content = _actionHelper.InsertFormAnswersIntoContent(action, formAnswers);
                             foreach (var recipient in recipients)
@@ -100,41 +112,6 @@ namespace form_builder.Services.ActionService
                     }
                 }
 
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        private void SendUserEmail(FormAction action, FormAnswers formAnswers)
-        {
-            var client = new SmtpClient("smtp.gmail.com")
-            {
-                Port = 587,
-                Credentials = new NetworkCredential("", ""),
-                EnableSsl = true
-            };
-
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(action.Properties.From),
-                Subject = action.Properties.Subject,
-                Body = action.Properties.Content,
-                IsBodyHtml = true
-            };
-
-            var toEmails = _actionHelper.InsertFormAnswersIntoProperty(action, formAnswers).Split(",");
-
-            foreach (var email in toEmails)
-            {
-                if (!string.IsNullOrEmpty(email))
-                    mailMessage.To.Add(email);
-            }
-
-            try
-            {
-                client.Send(mailMessage);
             }
             catch (Exception ex)
             {

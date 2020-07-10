@@ -78,7 +78,7 @@ namespace form_builder_tests.UnitTests.Services
             _mockEmailProvider.Setup(_ => _.SendAwsSesEmail(It.IsAny<EmailMessage>())).ReturnsAsync(HttpStatusCode.OK);
 
             // Act
-            await _actionService.Process(FormSchema);
+            await _actionService.Process(FormSchema, "123");
 
             // Assert
             _mockSessionHelper.Verify(_ => _.GetSessionGuid(), Times.Once);
@@ -91,7 +91,7 @@ namespace form_builder_tests.UnitTests.Services
             _mockSessionHelper.Setup(_ => _.GetSessionGuid()).Returns("");
 
             // Act & Assert
-            var result = await Assert.ThrowsAsync<Exception>(() => _actionService.Process(FormSchema));
+            var result = await Assert.ThrowsAsync<Exception>(() => _actionService.Process(FormSchema, "123"));
             Assert.Contains("ActionService::Process: Session has expired", result.Message);
         }
 
@@ -99,7 +99,7 @@ namespace form_builder_tests.UnitTests.Services
         public async Task Process_ShouldCall_DistributedCache()
         {
             // Act
-            await _actionService.Process(FormSchema);
+            await _actionService.Process(FormSchema, "123");
 
             // Assert
             _mockDistributedCache.Verify(_ => _.GetString(It.IsAny<string>()), Times.Once);
@@ -109,7 +109,7 @@ namespace form_builder_tests.UnitTests.Services
         public async Task Process_ShouldCall_ActionHelper_IfTypeIsUserEmail()
         {
             // Act
-            await _actionService.Process(FormSchema);
+            await _actionService.Process(FormSchema, "123");
 
             // Assert
             _mockActionHelper.Verify(_ => _.InsertFormAnswersIntoProperty(It.IsAny<FormAction>(), It.IsAny<FormAnswers>()), Times.Once);
@@ -119,7 +119,7 @@ namespace form_builder_tests.UnitTests.Services
         public async Task Process_ShouldCall_EmailProvider_IfTypeIsUserEmail()
         {
             // Act
-            await _actionService.Process(FormSchema);
+            await _actionService.Process(FormSchema, "123");
 
             // Assert
             _mockEmailProvider.Verify(_ => _.SendAwsSesEmail(It.IsAny<EmailMessage>()), Times.Once);
@@ -152,7 +152,7 @@ namespace form_builder_tests.UnitTests.Services
                 .Build();
 
             // Act
-            await _actionService.Process(formSchema);
+            await _actionService.Process(formSchema, "123");
 
             // Assert
             _mockActionHelper.Verify(_ => _.InsertFormAnswersIntoProperty(It.IsAny<FormAction>(), It.IsAny<FormAnswers>()), Times.Never);
@@ -185,7 +185,7 @@ namespace form_builder_tests.UnitTests.Services
                 .Build();
 
             // Act
-            await _actionService.Process(formSchema);
+            await _actionService.Process(formSchema, "123");
 
             // Assert
             _mockEmailProvider.Verify(_ => _.SendAwsSesEmail(It.IsAny<EmailMessage>()), Times.Never);
