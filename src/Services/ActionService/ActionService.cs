@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace form_builder.Services.ActionService
 {
     public interface IActionService
     {
-        Task Process(FormSchema baseForm);
+        Task Process(FormSchema baseForm, string caseRef);
     }
 
     public class ActionService : IActionService
@@ -34,7 +35,7 @@ namespace form_builder.Services.ActionService
             _actionHelper = actionHelper;
             _smsProvider = smsProvider;
         }
-        public async Task Process(FormSchema baseForm)
+        public async Task Process(FormSchema baseForm, string caseRef)
         {
             try
             {
@@ -47,14 +48,26 @@ namespace form_builder.Services.ActionService
 
                 var formData = _distributedCache.GetString(sessionGuid);
                 var formAnswers = JsonConvert.DeserializeObject<FormAnswers>(formData);
+                formAnswers.Pages.Add(new PageAnswers
+                {
+                    Answers = new List<Answers>
+                    {
+                        new Answers
+                        {
+                            QuestionId = "caseRef",
+                            Response = caseRef
+                        }
+                    }
+                });
                 foreach (var action in baseForm.FormActions)
                 {
                     switch (action.Type)
                     {
                         case EFormActionType.UserEmail:
+                            var awsEmailcontent = _actionHelper.InsertFormAnswersIntoContent(action, formAnswers);
                             var message = new EmailMessage(
                                 action.Properties.Subject,
-                                action.Properties.Content,
+                                awsEmailcontent,
                                 action.Properties.From,
                                 _actionHelper.InsertFormAnswersIntoProperty(action, formAnswers));
 
@@ -62,7 +75,14 @@ namespace form_builder.Services.ActionService
                             break;
 
                         case EFormActionType.BackOfficeEmail:
-                            SendUserEmail(action, formAnswers);
+                            var emailRecipients = _actionHelper.InsertFormAnswersIntoProperty(action, formAnswers).Split(",");
+                            var emailContent = _actionHelper.InsertFormAnswersIntoParameters(action, formAnswers).Split(",");
+                            foreach (var recipient in emailRecipients)
+                            {
+                                if (!string.IsNullOrEmpty(recipient))
+                                    _smsProvider.SendEmail(recipient, emailContent, action.Properties.Template);
+                            }
+                            //SendUserEmail(action, formAnswers);
                             break;
 
                         case EFormActionType.UserSms:

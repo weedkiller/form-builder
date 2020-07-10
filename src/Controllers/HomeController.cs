@@ -144,7 +144,8 @@ namespace form_builder.Controllers
         [Route("{form}/success")]
         public async Task<IActionResult> Success(string form)
         {
-            var result = await _successWorkflow.Process(form);
+            var caseRef = (string) TempData["reference"];
+            var result = await _successWorkflow.Process(form, caseRef);
             
             var success = new SuccessViewModel {
                 Reference = (string)TempData["reference"],

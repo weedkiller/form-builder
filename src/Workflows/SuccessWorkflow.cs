@@ -10,7 +10,7 @@ namespace form_builder.Workflows
 {
     public interface ISuccessWorkflow
     {
-        Task<SuccessPageEntity> Process(string form);
+        Task<SuccessPageEntity> Process(string form, string caseRef);
     }
 
     public class SuccessWorkflow : ISuccessWorkflow
@@ -26,13 +26,13 @@ namespace form_builder.Workflows
             _actionService = actionService;
         }
 
-        public async Task<SuccessPageEntity> Process(string form)
+        public async Task<SuccessPageEntity> Process(string form, string caseRef)
         {
             var baseForm = await _schemaFactory.Build(form);
 
             if (baseForm.FormActions != null && baseForm.FormActions.Any())
             {
-                await _actionService.Process(baseForm);
+                await _actionService.Process(baseForm, caseRef);
             }
 
             var result = await _pageService.FinalisePageJourney(form, EBehaviourType.SubmitForm);
