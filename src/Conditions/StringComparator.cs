@@ -15,6 +15,10 @@ namespace form_builder.Conditions
 
         public static bool IsNullOrEmpty(Condition condition, Dictionary<string, dynamic> viewModel)
         {
+            if (!viewModel.ContainsKey(condition.QuestionId))
+            {
+                return true;
+            }
             var val = !string.IsNullOrEmpty(condition.ComparisonValue) ? bool.Parse(condition.ComparisonValue) : condition.IsNullOrEmpty;
 
             return viewModel.ContainsKey(condition.QuestionId) && string.IsNullOrEmpty((string)viewModel[condition.QuestionId]) == val;
@@ -32,6 +36,11 @@ namespace form_builder.Conditions
             var val = !string.IsNullOrEmpty(condition.ComparisonValue) ? condition.ComparisonValue.ToLower() : condition.CheckboxContains.ToLower();
 
             return viewModel.ContainsKey(condition.QuestionId) && viewModel[condition.QuestionId].ToLower().EndsWith(val);
+        }
+
+        public static bool DoesNotExist(Condition condition, Dictionary<string, dynamic> viewModel)
+        {
+            return !viewModel.ContainsKey(condition.QuestionId);
         }
     }
 }

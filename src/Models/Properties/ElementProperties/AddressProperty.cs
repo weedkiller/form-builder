@@ -35,5 +35,7 @@
         public bool DisableManualAddress { get; set; } = false;
 
         public string NoManualAddressDetailText { get; set; }
+
+        public bool DeselectRadio { get; set; } = false;
     }
 }

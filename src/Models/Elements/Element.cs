@@ -45,8 +45,10 @@ namespace form_builder.Models.Elements
         public string ValidationMessage => validationResult.Message;
 
         public string Lookup { get; set; }
-        
-        public void Validate(Dictionary<string, dynamic> viewModel, IEnumerable<IElementValidator> validators)
+
+        public virtual bool DeselectRadio => Properties.DeselectRadio;
+
+		public void Validate(Dictionary<string, dynamic> viewModel, IEnumerable<IElementValidator> validators)
         {
             foreach (var validator in validators)
             {
