@@ -141,39 +141,5 @@ namespace form_builder_tests.UnitTests.Conditions
             // Act & Assert
             Assert.True(conditionValidator.IsValid(condition1, viewModel));
         }
-
-        [Fact]
-        public void Does_Not_Exist_Should_Return_True()
-        {
-            // Arrange
-            var viewModel = new Dictionary<string, dynamic>
-            {
-                {"nameOne", "Jon Chiles"},
-                {"nameTwo", "Cosmo Kramer"}
-            };
-
-            var condition = new Condition { ConditionType = ECondition.DoesNotExist, QuestionId = "nameThree" };
-            var conditionValidator = new ConditionValidator();
-
-            // Act & Assert
-            Assert.True(conditionValidator.IsValid(condition, viewModel));
-        }
-
-        [Fact]
-        public void Does_Not_Exist_Should_Return_False()
-        {
-            // Arrange
-            var viewModel = new Dictionary<string, dynamic>
-            {
-                {"nameOne", "Jon Chiles"},
-                {"nameTwo", "Cosmo Kramer"}
-            };
-
-            var condition = new Condition { ConditionType = ECondition.DoesNotExist, QuestionId = "nameOne" };
-            var conditionValidator = new ConditionValidator();
-
-            // Act & Assert
-            Assert.False(conditionValidator.IsValid(condition, viewModel));
-        }
     }
 }

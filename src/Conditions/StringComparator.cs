@@ -37,10 +37,5 @@ namespace form_builder.Conditions
 
             return viewModel.ContainsKey(condition.QuestionId) && viewModel[condition.QuestionId].ToLower().EndsWith(val);
         }
-
-        public static bool DoesNotExist(Condition condition, Dictionary<string, dynamic> viewModel)
-        {
-            return !viewModel.ContainsKey(condition.QuestionId);
-        }
     }
 }

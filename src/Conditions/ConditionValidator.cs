@@ -22,7 +22,6 @@ namespace form_builder.Conditions
             { ECondition.GreaterThanEqualTo, IntegerComparator.IsGreaterThanEqualTo },
             { ECondition.LessThanEqualTo, IntegerComparator.IsLessThanEqualTo },
             { ECondition.EndsWith, StringComparator.EndsWith },
-            { ECondition.DoesNotExist, StringComparator.DoesNotExist}
         };
 
         public bool IsValid(Condition condition, Dictionary<string, dynamic> viewModel) 

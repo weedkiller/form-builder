@@ -14,7 +14,6 @@
         GreaterThanEqualTo,
         LessThanEqualTo,
         EndsWith,
-        Any,
-        DoesNotExist
+        Any
     }
 }
