@@ -271,6 +271,15 @@ namespace form_builder.Services.BookingService
             viewModel.Remove(reservedBookingEndTime);
 
             var bookingRequest = await _mappingService.MapBookingRequest(guid, bookingElement, viewModel, form);
+
+            var formAnswers = GetFormData(guid);
+            var additionalInformation = formAnswers.Pages.SelectMany(x => x.Answers).Where(x => x.QuestionId.EndsWith("BookingAddInfo")).ToList();
+
+            foreach (var item in additionalInformation)
+            {
+                bookingRequest.AdditionalInformation += item.QuestionId + ": " + item.Response;
+            }
+
             var result = await _bookingProviders.Get(bookingElement.Properties.BookingProvider)
                 .Reserve(bookingRequest);
 
@@ -280,6 +289,17 @@ namespace form_builder.Services.BookingService
             viewModel.Add(reservedBookingId, result);
 
             return result;
+        }
+
+        public FormAnswers GetFormData(string guid)
+        {
+            var formData = _distributedCache.GetString(guid);
+            var convertedAnswers = new FormAnswers { Pages = new List<PageAnswers>() };
+
+            if (!string.IsNullOrEmpty(formData))
+                convertedAnswers = JsonConvert.DeserializeObject<FormAnswers>(formData);
+
+            return convertedAnswers;
         }
 
         private async Task<string> GetReservedBookingLocation(Booking bookingElement, string form, string guid)
