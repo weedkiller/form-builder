@@ -220,7 +220,14 @@ namespace form_builder.Helpers.ElementHelpers
                 formSchemaQuestions.ForEach(question =>
                 {
                     var answer = _elementMapper.GetAnswerStringValue(question, formAnswers);
-                    summaryBuilder.Add(question.GetLabelText(), answer, question.Type);
+                    if (!string.IsNullOrEmpty(question.Properties.SummaryLabel))
+                    {
+                        summaryBuilder.Add(question.Properties.SummaryLabel, answer, question.Type);
+                    }
+                    else
+                    {
+                        summaryBuilder.Add(question.GetLabelText(), answer, question.Type);
+                    }
                 });
 
                 pageSummary.Answers = summaryBuilder.Build();
