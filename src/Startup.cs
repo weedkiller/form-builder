@@ -68,6 +68,7 @@ namespace form_builder
                     {
                         _.Cookie.Name = ".formbuilder.antiforgery.v2";
                         _.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                        _.Cookie.IsEssential = true;
                     })
                 .AddSession(_ =>
                 {
@@ -75,6 +76,7 @@ namespace form_builder
                     _.Cookie.Path = "/";
                     _.Cookie.Name = ".formbuilder.v2";
                     _.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    _.Cookie.IsEssential = true;
                 });
 
             services
@@ -118,6 +120,7 @@ namespace form_builder
                 .UseSession()
                 .UseHttpsRedirection()
                 .UseStaticFiles()
+                .UseCookiePolicy()
                 .UseRouting()
                 .UseEndpoints(endpoints =>
                 endpoints.MapControllerRoute(

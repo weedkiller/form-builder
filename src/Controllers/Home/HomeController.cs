@@ -57,6 +57,13 @@ namespace form_builder.Controllers
         }
 
         [HttpGet]
+        [Route("/cookies")]
+        public IActionResult Cookies()
+        {
+            return View();
+        }
+
+        [HttpGet]
         [Route("{form}")]
         [Route("{form}/{path}")]
         [Route("{form}/{path}/{subPath}")]

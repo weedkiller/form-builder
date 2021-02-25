@@ -185,6 +185,7 @@ namespace form_builder.Utils.ServiceCollectionExtensions
             {
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
+                options.ConsentCookie.Name = "hide_cookie_banner";
             });
 
             return services;

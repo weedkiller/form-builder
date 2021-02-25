@@ -1,0 +1,40 @@
+@using Microsoft.AspNetCore.Http.Features
+
+@{
+    var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
+    var showBanner = !consentFeature?.CanTrack ?? false;
+    var cookieString = consentFeature?.CreateConsentCookie();
+}
+
+@if (showBanner)
+{
+    <div id="cookieBanner" class="govuk-cookie-banner " role="region" aria-label="Cookies on Stockport Council forms">
+  <div class="govuk-cookie-banner__message govuk-width-container">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        <h2 class="govuk-cookie-banner__heading govuk-heading-m">Cookies on Stockport Council forms</h2>
+
+        <div class="govuk-cookie-banner__content">
+          <p class="govuk-body">We use some essential cookies to make this service work.</p>
+        </div>
+      </div>
+    </div>
+    <div id="cookieConsent" class="govuk-button-group">
+      <a class="govuk-link" href="/cookies">View cookies</a>
+      <button type="button" class="govuk-button" data-module="govuk-button" data-cookie-string="@cookieString">
+        Hide this message
+      </button>
+    </div>
+  </div>
+</div>
+    <script>
+        (function () {
+            var button = document.querySelector("#cookieConsent button[data-cookie-string]");
+            var banner = document.querySelector("#cookieBanner");
+            button.addEventListener("click", function (event) {
+                document.cookie = button.dataset.cookieString;
+                banner.style.display = 'none';
+            }, false);
+        })();
+    </script>
+}
