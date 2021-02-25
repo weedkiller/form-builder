@@ -46,9 +46,12 @@ namespace form_builder.Services.SubmitService
             var currentPage = mappingEntity.BaseForm.GetPage(_pageHelper, mappingEntity.FormAnswers.Path);
             var submitSlug = currentPage.GetSubmitFormEndpoint(mappingEntity.FormAnswers, _environment.EnvironmentName.ToS3EnvPrefix());
 
-            _gateway.ChangeAuthenticationHeader(string.IsNullOrWhiteSpace(submitSlug.AuthToken)
-                ? string.Empty
-                : submitSlug.AuthToken);
+            if (submitSlug.AuthToken.ToLower() != "none")
+            {
+                _gateway.ChangeAuthenticationHeader(string.IsNullOrWhiteSpace(submitSlug.AuthToken)
+                    ? string.Empty
+                    : submitSlug.AuthToken);
+            }
 
             var response = await _gateway.PostAsync(submitSlug.URL, mappingEntity.Data);
             if (!response.IsSuccessStatusCode)
